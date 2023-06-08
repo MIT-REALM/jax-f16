@@ -1,0 +1,35 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+
+[project]
+name = "jax-f16"
+version = "0.0.1"
+description = "Jax F16 dynamics"
+authors = [{ name = "Oswin So" }, { email = "oswinso@gmail.com" }]
+maintainers = [{ name = "Oswin So" }, { email = "oswinso@gmail.com" }]
+readme = "README.md"
+license = { file = "LICENSE.txt" }
+requires-python = ">=3.10"
+classifiers = [
+  "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+  "Programming Language :: Python",
+]
+dependencies = ["jax", "jaxtyping"]
+
+[project.optional-dependencies]
+dev = ["pytest==5.0.0", "pytest-cov[all]", "mypy==0.910", "black==21.10b0"]
+
+[project.urls]
+Homepage = "https://mit-realm.github.io/efppo"
+documentation = "https://github.com/mit-realm/jax-f16"
+repository = "https://github.com/mit-realm/jax-f16"
+changelog = "https://github.com/mit-realm/jax-f16/blob/main/CHANGELOG.md"
+
+[tool.black]
+line-length = 120
+
+[tool.isort]
+profile = "black"
+known_first_party = [""]
