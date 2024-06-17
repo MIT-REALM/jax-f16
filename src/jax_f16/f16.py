@@ -2,8 +2,9 @@ import jax.numpy as jnp
 import numpy as np
 
 from jax_f16.f16_types import FULL_STATE_NX, OUTER_CONTROL_NU, FullState, OuterControl
-from jax_f16.f16_utils import Vec3, rotx, roty, rotz
+from jax_f16.f16_utils import Vec2, Vec3, rotx, roty, rotz
 from jax_f16.highlevel.controlled_f16 import controlled_f16
+from jax_f16.utils.jax_types import FloatScalar
 
 
 class F16:
@@ -43,6 +44,23 @@ class F16:
         nz, ps, nyr = -5.02734948e-04, -6.16608611e-20, -1.10228341e-08
         thrtl = -2.18080950e-02
         return np.array([nz, ps, nyr, thrtl])
+
+    @staticmethod
+    def state(vt: FloatScalar, alphabeta: Vec2, rpy: Vec3, pqr: Vec3, pos: Vec3, pow: FloatScalar, ints: Vec3):
+        vt = np.array([vt])
+        pow = np.array([pow])
+        arrs = [alphabeta, rpy, pqr, pos, ints]
+        alphabeta, rpy, pqr, pos, ints = [np.array(a) for a in arrs]
+        assert vt.shape == (1,)
+        assert alphabeta.shape == (2,)
+        assert rpy.shape == (3,)
+        assert pqr.shape == (3,)
+        assert pos.shape == (3,)
+        assert pow.shape == (1,)
+        assert ints.shape == (3,)
+        state = np.concatenate([vt, alphabeta, rpy, pqr, pos, pow, ints], axis=0)
+        assert state.shape == (F16.NX,)
+        return state
 
 
 def compute_f16_vel_angles(state: FullState) -> Vec3:
