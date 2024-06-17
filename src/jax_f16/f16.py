@@ -1,6 +1,8 @@
+import jax.numpy as jnp
 import numpy as np
 
 from jax_f16.f16_types import FULL_STATE_NX, OUTER_CONTROL_NU, FullState, OuterControl
+from jax_f16.f16_utils import Vec3, rotx, roty, rotz
 from jax_f16.highlevel.controlled_f16 import controlled_f16
 
 
@@ -13,7 +15,9 @@ class F16:
 
     # ENU
     POS = np.array([PE, PN, H])
+    POS_NEU = np.array([PN, PE, H])
     POS2D = np.array([PE, PN])
+    POS2D_NED = np.array([PN, PE])
     ANGLES = np.array([PHI, THETA, PSI])
     ANGLE_DIMS = np.array([ALPHA, BETA, PHI, THETA, PSI])
     PQR = np.array([P, Q, R])
@@ -39,3 +43,29 @@ class F16:
         nz, ps, nyr = -5.02734948e-04, -6.16608611e-20, -1.10228341e-08
         thrtl = -2.18080950e-02
         return np.array([nz, ps, nyr, thrtl])
+
+
+def compute_f16_vel_angles(state: FullState) -> Vec3:
+    """Compute cos / sin of [gamma, sigma], the pitch & yaw of the velocity vector."""
+    assert state.shape == (F16.NX,)
+    # 1: Compute {}^{W}R^{F16}.
+    R_W_F16 = rotz(state[F16.PSI]) @ roty(state[F16.THETA]) @ rotx(state[F16.PHI])
+    assert R_W_F16.shape == (3, 3)
+
+    # 2: Compute v_{F16}
+    ca, sa = jnp.cos(state[F16.ALPHA]), jnp.sin(state[F16.ALPHA])
+    cb, sb = jnp.cos(state[F16.BETA]), jnp.sin(state[F16.BETA])
+    v_F16 = jnp.array([ca * cb, sb, sa * cb])
+
+    # 3: Compute v_{W}
+    v_W = R_W_F16 @ v_F16
+    assert v_W.shape == (3,)
+
+    # 4: Back out cos and sin of gamma and sigma.
+    cos_sigma = v_W[0]
+    sin_sigma = v_W[1]
+    sin_gamma = v_W[2]
+
+    out = jnp.array([cos_sigma, sin_sigma, sin_gamma])
+    assert out.shape == (3,)
+    return out

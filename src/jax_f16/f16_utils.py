@@ -1,3 +1,4 @@
+import jax.numpy as jnp
 import numpy as np
 
 from jax_f16.utils.jax_types import Arr, Float
@@ -5,6 +6,23 @@ from jax_f16.utils.jax_types import Arr, Float
 Scalar = float | tuple[float, float] | Float[Arr, "*b"]
 Vec2 = list[Scalar] | tuple[Scalar] | Float[Arr, "*b 2"]
 Vec3 = list[Scalar] | tuple[Scalar, Scalar, Scalar] | Float[Arr, "*b 3"]
+
+RotMat3D = Float[Arr, "3 3"]
+
+
+def rotz(psi: Scalar) -> RotMat3D:
+    c, s = jnp.cos(psi), jnp.sin(psi)
+    return jnp.array([[c, -s, 0], [s, c, 0], [0, 0, 1]])
+
+
+def roty(theta: Scalar) -> RotMat3D:
+    c, s = jnp.cos(theta), jnp.sin(theta)
+    return jnp.array([[c, 0, s], [0, 1, 0], [-s, 0, c]])
+
+
+def rotx(phi: Scalar) -> RotMat3D:
+    c, s = jnp.cos(phi), jnp.sin(phi)
+    return jnp.array([[1, 0, 0], [0, c, -s], [0, s, c]])
 
 
 def f16state(vt: Scalar, ab: Vec2, rpy: Vec3, pqr: Vec3, pos3d: Vec3, power: Scalar, ints: Vec3) -> Float[Arr, "*b nx"]:
