@@ -58,7 +58,7 @@ def thrust(power: FloatScalar, alt: FloatScalar, rmach: FloatScalar) -> FloatSca
 
     # if i >= 5:
     #     i = 4
-    i = jnp.clip(i, a_max=4)
+    i = jnp.clip(i, max=4)
 
     dh = h - i
     rm = 5 * rmach
@@ -68,7 +68,7 @@ def thrust(power: FloatScalar, alt: FloatScalar, rmach: FloatScalar) -> FloatSca
     #     m = 4
     # elif m <= 0:
     #     m = 0
-    m = jnp.clip(m, a_min=0, a_max=4)
+    m = jnp.clip(m, min=0, max=4)
 
     dm = rm - m
     cdh = 1 - dh
